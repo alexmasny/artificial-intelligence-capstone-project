@@ -1,5 +1,13 @@
-# artificial-intelligence-capstone-project
+# Artificial Intelligence Capstone Project – Black-Box Optimization (BBO)
 
-This repository will host the work for my capstone project.
+## Project Goals and Technologies
 
 The project's goals and key technologies will be defined later.
+
+## Weekly Progress
+
+### Week 1
+- Initialized project structure.
+- Created virtual environment and installed dependencies (`numpy`, `scipy`, `scikit-learn`, `matplotlib`).
+- Implemented `load_data` helper in `utils.py`.
+- Performed Exploratory Data Analysis (EDA), including statistical summaries, visualizations, and feature importance analysis. Created `eda_analysis.ipynb` and `eda_analisys.py`.
