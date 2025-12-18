@@ -1,64 +1,69 @@
 # Artificial Intelligence Capstone Project – Black-Box Optimization (BBO)
 
-## Project Goals and Technologies
+## **Project Overview**
 
-### Project Goals
+### **Black-Box Optimization (BBO) Capstone**
 
-- The primary goal of this capstone project is to build and optimize a machine learning model within a simulated black-box environment. This involves:
-- Applying ML techniques to solve a real-world style optimization problem where the internal workings of the functions are unknown.
-- Demonstrating the ability to make iterative, evidence-based improvements to model performance without access to exact evaluation metrics during the process.
-- Optimizing eight unknown functions (black-box functions) with varying dimensions (2D to 8D) using limited queries.
-- Balancing exploration and exploitation strategies to find the maximum output for each function.
-- Documenting the process and reflecting on the strategies used, challenges faced, and adjustments made.
-- Creating a tangible, portfolio-ready artefact (this GitHub repository) that showcases the ability to tackle complex ML challenges.
+This repository documents my solution for the Black-Box Optimization challenge, simulating a real-world machine learning scenario where the objective functions are unknown, high-dimensional, and expensive to evaluate. The goal is to maximize the output of eight distinct functions (ranging from 2D to 8D) using a limited budget of weekly queries.
 
-### Key Technologies & Concepts
+**Relevance:** In industries like drug discovery, chemical manufacturing, or automated hyperparameter tuning, we often treat systems as "black boxes" — we can observe inputs and outputs, but not the internal physics. This project mirrors that constraint, requiring data-driven decision-making under uncertainty.
 
-- Black-Box Optimization (BBO): The core problem setting where the objective function's analytical form is unknown.
-- Bayesian Optimization: A probabilistic model-based approach for finding the global optimum of black-box functions.
-- Gaussian Processes (GP): Used as a surrogate model to approximate the unknown functions and estimate uncertainty.
-- Acquisition Functions: specifically Upper Confidence Bound (UCB), used to guide the search by balancing exploration (sampling uncertain areas) and exploitation (sampling high-performing areas).
-- Python: The primary programming language used for implementation.
+**Career Value:** Mastering BBO equips me with the skills to handle "cold start" problems and optimize complex systems efficiently, moving beyond standard supervised learning into active learning and decision science.
 
-#### Libraries:
+### **Inputs and Outputs**
 
-- numpy: For numerical operations and data manipulation.
-- scikit-learn: For implementing Gaussian Process Regressor and other ML utilities.
-- scipy: For scientific and technical computing.
-- matplotlib: For visualizing data and optimization landscapes.
+The interaction with the "black box" is structured as follows:
 
-#### Exploratory Data Analysis (EDA)
+* **Inputs:** A query vector $X$ of dimension D (where $D \in \{2, ..., 8\}$).
+  * *Constraints:* All values must be within the hypercube $[0, 1]$.
+  * *Format:* `X1 - X2 - ... - Xn` (e.g., `0.123456 - 0.987654` for a 2D function).
+* **Outputs:** A single continuous scalar value $Y$.
+  * *Goal:* Maximize $Y$.
+  * *Feedback:* After each weekly submission, one new pair ($X_{new}$, $Y_{new}$) is added to the training set.
 
-Techniques used to understand the initial data distribution and feature importance.
 
-## Weekly Progress
 
-### Week 1
+### **Challenge Objectives**
 
-- Initialized project structure.
-- Created virtual environment and installed dependencies (numpy, scipy, scikit-learn, matplotlib).
-- Implemented load_data helper in utils.py.
-- Performed Exploratory Data Analysis (EDA), including statistical summaries, visualizations, and feature importance analysis.
-- Created eda_analysis.ipynb and eda_analisys.py
-- Developed a Bayesian Optimization engine utilizing Gaussian Process Regression (Matern kernel) and Upper Confidence Bound (UCB) acquisition, featuring dynamic exploration-exploitation strategies and heuristic biased sampling for high-dimensional constraints.
-- bayesian_optimization.ipynb
+The primary objective is not just finding the global maximum, but demonstrating a robust **optimization strategy**.
 
-### Week 2
+1. **Maximize Function Output:** Systematically navigate the search space to find peak values.
+2. **Efficient Querying:** Use limited samples (starting with 10 points) to learn complex landscapes.
+3. **Manage Trade-offs:** Balance **Exploration** (gathering information in unknown regions) vs. **Exploitation** (refining solutions in promising areas).
+4. **Handle High Dimensions:** Mitigate the "curse of dimensionality" in 8D functions where data is extremely sparse.
 
-- Refined Bayesian Optimization strategy based on Week 1 results and feedback.
-- Updated the dataset with new query results (11 data points per function).
-- Implemented a tailored exploration-exploitation strategy using dynamic kappa values for the UCB acquisition function,
-adjusting based on function characteristics (e.g., noise, correlation).
-- Applied heuristic biased sampling for the high-dimensional Function 8 to focus on promising regions.
-- Integrated StandardScaler for target variable normalization to improve GP stability, particularly for functions with large output ranges.
-- Generated and submitted the second round of queries.
-  - week2_bayesian_optimization.ipynb
+### **Technical Approach (Living Document)**
 
-### Week 3
+My approach evolves iteratively as the dataset grows from 10 to ~22 points.
 
-- Implemented a **Hybrid SVM-GP Optimization Strategy**:
-  - **SVC Filtering:** Used Support Vector Classification (RBF kernel) to classify and prune the search space for high-dimensional functions (e.g., Function 8), filtering out low-probability regions before GP evaluation.
-  - **SVR Consensus:** Integrated Support Vector Regression (SVR) as a secondary validation signal for mid-dimensional functions to refine UCB scores.
-- Continued applying `StandardScaler` and biased sampling based on accumulated data evidence.
-- Generated 3rd round of queries focusing on interpretability and search space reduction.
-  - week_3_svm_strategy.ipynb
+#### **Phase 1: Baseline & EDA (Week 1)**
+
+* **Method:** Random Search and Random Forest-based Exploratory Data Analysis (EDA).
+* **Goal:** Understand the landscape. I analyzed Pearson correlations and Feature Importance to classify functions into "simple" (linear correlations) vs. "complex" (noisy/non-linear).
+* **Key Insight:** Discovered that Function 8 (8D) effectively operates on a lower-dimensional manifold (dominated by dimensions 1 and 3).
+
+#### **Phase 2: Bayesian Optimization (Week 2)**
+
+* **Method:** Gaussian Process (GP) Regression with a Matern kernel + Upper Confidence Bound (UCB) acquisition function.
+* **Strategy:**
+  * **Dynamic Kappa:** Tuned the exploration parameter ($\kappa$) per function. High $\kappa$ (5.0) for noisy functions (1 & 7) to encourage exploration; low $\kappa$ (1.96) for "well-behaved" functions.
+  * **Data Transformation:** Applied `StandardScaler` to targets (e.g., Function 5) to stabilize GP variance estimation in high-magnitude ranges.
+  * **Heuristic Biased Sampling:** For Function 8, I biased the candidate generation toward low values for dimensions $X_1$ and $X_3$ based on strong negative correlations found in EDA, while allowing other dimensions to vary freely.
+
+#### **Phase 3: Hybrid SVM-GP Strategy (Week 3 - Current)**
+
+* **Method:** Integration of Support Vector Machines (SVM) to assist the Gaussian Process.
+* **Refinement:**
+  * **SVC Pruning:** For high-dimensional functions (6D-8D), I implemented a Support Vector Classifier (RBF kernel) to pre-filter the search space, discarding "low-yield" regions before the GP evaluation. This reduces the search volume for the optimizer.
+  * **SVR Consensus:** For mid-dimensional functions, an SVR model acts as a secondary validator. Queries are prioritized only if both the GP (probabilistic) and SVR (deterministic) agree on their potential.
+
+
+---
+
+### **Summary of Progress (For README)**
+
+| Week | Strategy | Key Technologies | Outcome |
+| --- | --- | --- | --- |
+| **1** | Random Search | `numpy`, EDA, Random Forest | Established baseline, identified key features in 8D function. |
+| **2** | Bayesian Optimization | `sklearn` GP, UCB, `StandardScaler` | Transitioned to model-based search; tailored exploration (\kappa) to function noise. |
+| **3** | Hybrid SVM-GP | `SVC` Filtering, `SVR` Ensemble | Reduced search space for High-Dim functions; improved robustness against local optima. |
