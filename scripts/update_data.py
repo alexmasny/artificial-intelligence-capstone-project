@@ -23,7 +23,7 @@ def update_function_data(func_id, new_x, new_y):
     """
     Standard update logic: loads .npy files, appends new row, saves.
     """
-    base_path = f"data/function_{func_id}"
+    base_path = f"data/raw/function_{func_id}"
     inputs_path = f"{base_path}/initial_inputs.npy"
     outputs_path = f"{base_path}/initial_outputs.npy"
 

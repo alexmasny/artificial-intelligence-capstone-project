@@ -12,7 +12,7 @@ def load_data(function_id):
         tuple: (inputs, outputs) loaded from .npy files.
                Returns (None, None) if files are not found.
     """
-    data_dir = 'data'
+    data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'raw')
     function_dir = os.path.join(data_dir, f'function_{function_id}')
     inputs_path = os.path.join(function_dir, 'initial_inputs.npy')
     outputs_path = os.path.join(function_dir, 'initial_outputs.npy')
