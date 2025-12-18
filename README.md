@@ -52,4 +52,13 @@ adjusting based on function characteristics (e.g., noise, correlation).
 - Applied heuristic biased sampling for the high-dimensional Function 8 to focus on promising regions.
 - Integrated StandardScaler for target variable normalization to improve GP stability, particularly for functions with large output ranges.
 - Generated and submitted the second round of queries.
-  - bayesian_optimization_week2.ipynb
+  - week2_bayesian_optimization.ipynb
+
+### Week 3
+
+- Implemented a **Hybrid SVM-GP Optimization Strategy**:
+  - **SVC Filtering:** Used Support Vector Classification (RBF kernel) to classify and prune the search space for high-dimensional functions (e.g., Function 8), filtering out low-probability regions before GP evaluation.
+  - **SVR Consensus:** Integrated Support Vector Regression (SVR) as a secondary validation signal for mid-dimensional functions to refine UCB scores.
+- Continued applying `StandardScaler` and biased sampling based on accumulated data evidence.
+- Generated 3rd round of queries focusing on interpretability and search space reduction.
+  - week_3_svm_strategy.ipynb
