@@ -60,7 +60,7 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
 
 ---
 
-### **Summary of Progress (For README)**
+### **Summary of Progress**
 
 | Week | Strategy | Key Technologies | Outcome |
 | --- | --- | --- | --- |
