@@ -150,3 +150,9 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
 | **4** | Neural Gradient Ascent | MLPRegressor, L-BFGS, scipy.optimize | Used backpropagation to steer queries; captured non-linearities in complex functions. |
 | **5** | Neural Ensembles | NN Bagging, Ensemble Learning | Improved robustness against overfitting; applied hierarchical feature learning concepts. |
 | **6** | Trust Region Optimization | Localized Gradient Ascent | Improved performance against global optima. |
+
+## References
+
+- Snoek, J., Larochelle, H., & Adams, R. P. (2012). Practical Bayesian Optimization of Machine Learning Algorithms. *NeurIPS*.
+- Lakshminarayanan, B., Pritzel, A., & Blundell, C. (2017). Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles. *NeurIPS*.
+- Eriksson, D., et al. (2019). Scalable Global Optimization with Trust Regions (TuRBO). *NeurIPS*.
