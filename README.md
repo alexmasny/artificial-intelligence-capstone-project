@@ -133,6 +133,13 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
   * **Hierarchical Features:** Slightly deepened the network architecture to capture non-linear feature interactions (inspired by Deep Learning feature hierarchies), while relying on the ensemble for regularization.  
   * **Robust Optimization:** Performed gradient ascent on the *averaged* ensemble surface, ensuring the chosen query satisfies the consensus of multiple models.
 
+#### **Phase 6: Trust Region Optimization (Week 6)**
+
+* **Method:** Localized Gradient Ascent within a dynamic "Trust Region".
+* **Strategy:**
+    * **Trust Regions (Receptive Fields):** Constrained the optimization search space to a hypercube ($\pm 20\%$) around the current best known point. This prevents the optimizer from exploiting global linear trends (saturating at 1.0) and forces it to refine local optima, analogous to CNN receptive fields focusing on local features.
+    * **Ensemble Pooling:** Continued using Neural Bagging to smooth out the decision surface, acting as an "Average Pooling" layer to filter noise from individual surrogate models.
+
 ### **Summary of Progress**
 
 | Week | Strategy | Key Technologies | Outcome |
@@ -142,4 +149,4 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
 | **3** | Hybrid SVM-GP | SVC Filtering, SVR Ensemble | Reduced search space for High-Dim functions; improved robustness against local optima. |
 | **4** | Neural Gradient Ascent | MLPRegressor, L-BFGS, scipy.optimize | Used backpropagation to steer queries; captured non-linearities in complex functions. |
 | **5** | Neural Ensembles | NN Bagging, Ensemble Learning | Improved robustness against overfitting; applied hierarchical feature learning concepts. |
-
+| **6** | Trust Region Optimization | Localized Gradient Ascent | Improved performance against global optima. |
