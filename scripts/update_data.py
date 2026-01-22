@@ -1,72 +1,22 @@
 import numpy as np
 import os
-import ast
-
-# ==========================================
-# CONFIGURATION: CHANGE THIS EVERY WEEK
-# ==========================================
-CURRENT_WEEK = "week2"
-# This tells the script to look in: data/update/week*/
-# ==========================================
+import re
+import glob
 
 
-def get_update_paths():
-    """Generates paths based on the CURRENT_WEEK variable."""
-    base_dir = os.path.join("data", "update", CURRENT_WEEK)
-    return {
-        "inputs": os.path.join(base_dir, "inputs.txt"),
-        "outputs": os.path.join(base_dir, "outputs.txt"),
-    }
-
-
-def update_function_data(func_id, new_x, new_y):
+def get_sorted_weeks():
     """
-    Standard update logic: loads .npy files, appends new row, saves.
+    Finds all week directories in data/update/ and returns them sorted by week number.
     """
-    base_path = f"data/raw/function_{func_id}"
-    inputs_path = f"{base_path}/initial_inputs.npy"
-    outputs_path = f"{base_path}/initial_outputs.npy"
+    base_dir = os.path.join("data", "update")
+    week_dirs = glob.glob(os.path.join(base_dir, "week*"))
 
-    try:
-        # 1. Load existing data
-        current_X = np.load(inputs_path)
-        current_Y = np.load(outputs_path)
+    # Sort by the integer number in the folder name (e.g., "week1", "week2")
+    def extract_week_num(d):
+        match = re.search(r"week(\d+)", d)
+        return int(match.group(1)) if match else 0
 
-        # 2. Prepare new data
-        # Ensure new_x is 2D (1 sample, N features)
-        new_x_arr = np.array(new_x).reshape(1, -1)
-
-        # Ensure new_y is correct shape
-        # If Y is a scalar float, make it 1D array. If existing Y is 2D, make new Y 2D.
-        new_y_arr = np.array([new_y])
-        if current_Y.ndim > 1:
-            new_y_arr = new_y_arr.reshape(1, -1)
-
-        # 3. Validation
-        if new_x_arr.shape[1] != current_X.shape[1]:
-            print(
-                f"❌ Func {func_id} Error: Dimension mismatch (New: {new_x_arr.shape[1]}, Old: {current_X.shape[1]})"
-            )
-            return
-
-        # 4. Append data
-        updated_X = np.vstack((current_X, new_x_arr))
-
-        if current_Y.ndim == 1:
-            updated_Y = np.append(current_Y, new_y)
-        else:
-            updated_Y = np.vstack((current_Y, new_y_arr))
-
-        # 5. Save
-        np.save(inputs_path, updated_X)
-        np.save(outputs_path, updated_Y)
-
-        print(f"✅ Function {func_id} updated. (Total points: {len(updated_X)})")
-
-    except FileNotFoundError:
-        print(f"❌ Error: Database files not found for Function {func_id}")
-    except Exception as e:
-        print(f"❌ Error processing Function {func_id}: {e}")
+    return sorted(week_dirs, key=extract_week_num)
 
 
 def parse_text_data(file_path):
@@ -95,45 +45,105 @@ def parse_text_data(file_path):
     return eval(content, context)
 
 
-def run_weekly_update():
-    paths = get_update_paths()
+def load_initial_data(func_id):
+    """
+    Loads the initial data for a given function.
+    """
+    base_path = f"data/initial_data/function_{func_id}"
+    inputs_path = f"{base_path}/initial_inputs.npy"
+    outputs_path = f"{base_path}/initial_outputs.npy"
 
-    print(f"📂 Looking for updates in: data/update/{CURRENT_WEEK}/")
+    if not os.path.exists(inputs_path) or not os.path.exists(outputs_path):
+        print(f"⚠️ Initial data not found for Function {func_id} at {base_path}")
+        return None, None
 
-    try:
-        # Parse the text files
-        inputs_list = parse_text_data(paths["inputs"])
-        outputs_list = parse_text_data(paths["outputs"])
+    return np.load(inputs_path), np.load(outputs_path)
 
-        if len(inputs_list) != 8 or len(outputs_list) != 8:
-            print(
-                f"⚠️ Warning: Expected 8 functions. Found {len(inputs_list)} inputs and {len(outputs_list)} outputs."
-            )
 
-        print("--- Starting Update ---")
+def save_processed_data(func_id, X, Y):
+    """
+    Saves the aggregated data to data/processed.
+    """
+    output_dir = f"data/processed/function_{func_id}"
+    os.makedirs(output_dir, exist_ok=True)
 
-        # Iterate through the lists and update each function
-        for i in range(len(inputs_list)):
-            func_id = i + 1
-            x_data = inputs_list[i]
-            y_data = outputs_list[i]
+    np.save(os.path.join(output_dir, "initial_inputs.npy"), X)
+    np.save(os.path.join(output_dir, "initial_outputs.npy"), Y)
+    print(f"✅ Saved processed data for Function {func_id}: {len(X)} samples")
 
-            # Handle cases where y_data might be wrapped in a numpy scalar
-            if hasattr(y_data, "item"):
-                y_data = y_data.item()
 
-            update_function_data(func_id, x_data, y_data)
+def run_full_update():
+    print("🚀 Starting full data update process...")
 
-        print("--- Update Complete ---")
+    # Get all weekly update folders
+    week_dirs = get_sorted_weeks()
+    print(f"found weekly updates: {[os.path.basename(w) for w in week_dirs]}")
 
-    except FileNotFoundError as e:
-        print(f"❌ Critical Error: {e}")
-        print(
-            "Please ensure you have created the folder and files exactly as shown in the screenshot."
-        )
-    except Exception as e:
-        print(f"❌ An error occurred: {e}")
+    # Process each function
+    for func_id in range(1, 9):  # Functions 1 to 8
+        print(f"\nProcessing Function {func_id}...")
+
+        # 1. Load Initial Data
+        current_X, current_Y = load_initial_data(func_id)
+        if current_X is None:
+            continue
+
+        print(f"  Loaded initial data: {len(current_X)} samples")
+
+        # 2. Iterate through all weeks and apply updates
+        for week_dir in week_dirs:
+            week_name = os.path.basename(week_dir)
+            inputs_path = os.path.join(week_dir, "inputs.txt")
+            outputs_path = os.path.join(week_dir, "outputs.txt")
+
+            try:
+                inputs_list = parse_text_data(inputs_path)
+                outputs_list = parse_text_data(outputs_path)
+
+                # Check bounds
+                if len(inputs_list) < func_id or len(outputs_list) < func_id:
+                    print(
+                        f"  ⚠️ Warning: {week_name} data too short for function {func_id}"
+                    )
+                    continue
+
+                # Get data for this specific function (indices are 0-based, func_id is 1-based)
+                new_x = inputs_list[func_id - 1]
+                new_y = outputs_list[func_id - 1]
+
+                # Reshape/Format Logic (copied from original script)
+                new_x_arr = np.array(new_x).reshape(1, -1)
+
+                # Handle scalar Y wrap
+                if hasattr(new_y, "item"):
+                    new_y = new_y.item()
+
+                new_y_arr = np.array([new_y])
+                if current_Y.ndim > 1:
+                    new_y_arr = new_y_arr.reshape(1, -1)
+
+                # Dimension check
+                if new_x_arr.shape[1] != current_X.shape[1]:
+                    print(f"  ❌ {week_name}: Dim mismatch. Skip.")
+                    continue
+
+                # Stack
+                current_X = np.vstack((current_X, new_x_arr))
+                if current_Y.ndim == 1:
+                    current_Y = np.append(current_Y, new_y)
+                else:
+                    current_Y = np.vstack((current_Y, new_y_arr))
+
+                print(f"  + Added data from {week_name}")
+
+            except Exception as e:
+                print(f"  ❌ Error processing {week_name}: {e}")
+
+        # 3. Save to processed
+        save_processed_data(func_id, current_X, current_Y)
+
+    print("\n🎉 Data update complete!")
 
 
 if __name__ == "__main__":
-    run_weekly_update()
+    run_full_update()
