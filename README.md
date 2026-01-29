@@ -140,16 +140,25 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
     * **Trust Regions (Receptive Fields):** Constrained the optimization search space to a hypercube ($\pm 20\%$) around the current best known point. This prevents the optimizer from exploiting global linear trends (saturating at 1.0) and forces it to refine local optima, analogous to CNN receptive fields focusing on local features.
     * **Ensemble Pooling:** Continued using Neural Bagging to smooth out the decision surface, acting as an "Average Pooling" layer to filter noise from individual surrogate models.
 
+#### **Phase 7: Adaptive AutoML & Robust Acquisition (Week 7 - Current)**
+
+* **Method:** Per-function architecture search (AutoML) and enhanced acquisition using UCB + Repulsion.
+* **Strategy:**
+    * **Adaptive Complexity (AutoML):** Implemented `RandomizedSearchCV` to automatically select the optimal MLP architecture (`hidden_layer_sizes`, `alpha`) for each function based on historical points. This allows the model to adapt to varying degrees of function complexity.
+    * **UCB-Repulsion Acquisition:** Enhanced the acquisition function with Upper Confidence Bound (UCB) and a Gaussian Repulsion Penalty. The penalty actively "pushes" the optimizer away from already-sampled high-value points, forcing it to explore novel high-potential regions within the Trust Region.
+    * **Perturbed Initialization:** Solved "zero-gradient" saddle points by initializing the gradient ascent with small random perturbations from the current best point.
+
 ### **Summary of Progress**
 
-| Week | Strategy | Key Technologies | Outcome |
-| :---- | :---- | :---- | :---- |
-| **1** | Random Search | numpy, EDA, Random Forest | Established baseline, identified key features in 8D function. |
-| **2** | Bayesian Optimization | sklearn GP, UCB, StandardScaler | Transitioned to model-based search; tailored exploration ($\\kappa$) to function noise. |
-| **3** | Hybrid SVM-GP | SVC Filtering, SVR Ensemble | Reduced search space for High-Dim functions; improved robustness against local optima. |
-| **4** | Neural Gradient Ascent | MLPRegressor, L-BFGS, scipy.optimize | Used backpropagation to steer queries; captured non-linearities in complex functions. |
-| **5** | Neural Ensembles | NN Bagging, Ensemble Learning | Improved robustness against overfitting; applied hierarchical feature learning concepts. |
-| **6** | Trust Region Optimization | Localized Gradient Ascent | Improved performance against global optima. |
+| Week  | Strategy                  | Key Technologies                     | Outcome                                                                                      |
+| :---- | :------------------------ | :----------------------------------- | :------------------------------------------------------------------------------------------- |
+| **1** | Random Search             | numpy, EDA, Random Forest            | Established baseline, identified key features in 8D function.                                |
+| **2** | Bayesian Optimization     | sklearn GP, UCB, StandardScaler      | Transitioned to model-based search; tailored exploration ($\\kappa$) to function noise.      |
+| **3** | Hybrid SVM-GP             | SVC Filtering, SVR Ensemble          | Reduced search space for High-Dim functions; improved robustness against local optima.       |
+| **4** | Neural Gradient Ascent    | MLPRegressor, L-BFGS, scipy.optimize | Used backpropagation to steer queries; captured non-linearities in complex functions.        |
+| **5** | Neural Ensembles          | NN Bagging, Ensemble Learning        | Improved robustness against overfitting; applied hierarchical feature learning concepts.     |
+| **6** | Trust Region Optimization | Localized Gradient Ascent            | Improved performance against global optima.                                                  |
+| **7** | Adaptive AutoML           | RandomizedSearchCV, UCB, Repulsion   | Optimized architecture per function; forced exploration near peaks with repulsive gradients. |
 
 ## References
 
