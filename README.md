@@ -140,13 +140,21 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
     * **Trust Regions (Receptive Fields):** Constrained the optimization search space to a hypercube ($\pm 20\%$) around the current best known point. This prevents the optimizer from exploiting global linear trends (saturating at 1.0) and forces it to refine local optima, analogous to CNN receptive fields focusing on local features.
     * **Ensemble Pooling:** Continued using Neural Bagging to smooth out the decision surface, acting as an "Average Pooling" layer to filter noise from individual surrogate models.
 
-#### **Phase 7: Adaptive AutoML & Robust Acquisition (Week 7 - Current)**
+#### **Phase 7: Adaptive AutoML & Robust Acquisition (Week 7)**
 
 * **Method:** Per-function architecture search (AutoML) and enhanced acquisition using UCB + Repulsion.
 * **Strategy:**
     * **Adaptive Complexity (AutoML):** Implemented `RandomizedSearchCV` to automatically select the optimal MLP architecture (`hidden_layer_sizes`, `alpha`) for each function based on historical points. This allows the model to adapt to varying degrees of function complexity.
     * **UCB-Repulsion Acquisition:** Enhanced the acquisition function with Upper Confidence Bound (UCB) and a Gaussian Repulsion Penalty. The penalty actively "pushes" the optimizer away from already-sampled high-value points, forcing it to explore novel high-potential regions within the Trust Region.
     * **Perturbed Initialization:** Solved "zero-gradient" saddle points by initializing the gradient ascent with small random perturbations from the current best point.
+
+#### **Phase 8: LLM-Informed Optimization (Week 8 - Current)**
+
+* **Method:** "LLM-Critic" hybrid strategy layered on the Week 7 numerical engine.
+* **Strategy:**
+    * **Numerical Engine (Primary):** Reused Adaptive AutoML + Trust Region optimization to generate valid candidate submissions with precise floating-point control.
+    * **Prompt Generation (Secondary):** Built Few-Shot Chain-of-Thought style prompts from historical inputs/outputs to analyze token usage, context windows, and framing effects for reflection.
+    * **Separation of Concerns:** LLM prompts are used for conceptual analysis only; final submissions remain purely numerical to avoid hallucinated values.
 
 ### **Summary of Progress**
 
@@ -159,6 +167,7 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
 | **5** | Neural Ensembles          | NN Bagging, Ensemble Learning        | Improved robustness against overfitting; applied hierarchical feature learning concepts.     |
 | **6** | Trust Region Optimization | Localized Gradient Ascent            | Improved performance against global optima.                                                  |
 | **7** | Adaptive AutoML           | RandomizedSearchCV, UCB, Repulsion   | Optimized architecture per function; forced exploration near peaks with repulsive gradients. |
+| **8** | LLM-Informed Optimization | LLM prompt analysis, Adaptive AutoML | Used LLMs for reflection on sequence framing; kept numerical engine for valid submissions.   |
 
 ## References
 
