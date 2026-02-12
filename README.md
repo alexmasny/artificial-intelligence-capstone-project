@@ -156,6 +156,14 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
     * **Prompt Generation (Secondary):** Built Few-Shot Chain-of-Thought style prompts from historical inputs/outputs to analyze token usage, context windows, and framing effects for reflection.
     * **Separation of Concerns:** LLM prompts are used for conceptual analysis only; final submissions remain purely numerical to avoid hallucinated values.
 
+#### **Phase 9: Scaling Laws & Emergent Behaviors (Week 9 - Current)**
+
+* **Method:** Massive Neural Ensembling (Bagging) + Trust Regions + Repulsion.
+* **Strategy:**
+    * **Scaling Laws (Ensemble Size):** Scaled the surrogate model from 3 to **20 Neural Networks**. Following scaling laws, this linearly reduced the variance of uncertainty estimates, providing a robust signal for the UCB acquisition function without needing more data.
+    * **Emergent Robustness:** Leveraged the "wisdom of the crowd" to handle high-dimensional edge cases (Func 7 & 8). The large ensemble naturally smoothed out local noise and prevented boundary saturation, an emergent behavior not explicitly programmed but resulting from scale.
+    * **Diminishing Returns:** Balanced the compute cost of 20x inference against the marginal gains in lower dimensions, accepting higher latency for the sake of stability in critical high-dim functions.
+
 ### **Summary of Progress**
 
 | Week  | Strategy                  | Key Technologies                     | Outcome                                                                                      |
@@ -168,9 +176,11 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
 | **6** | Trust Region Optimization | Localized Gradient Ascent            | Improved performance against global optima.                                                  |
 | **7** | Adaptive AutoML           | RandomizedSearchCV, UCB, Repulsion   | Optimized architecture per function; forced exploration near peaks with repulsive gradients. |
 | **8** | LLM-Informed Optimization | LLM prompt analysis, Adaptive AutoML | Used LLMs for reflection on sequence framing; kept numerical engine for valid submissions.   |
+| **9** | Scaling Ensembles         | BaggingRegressor (N=20), TrustRegion | Reduced variance via massive ensembling; achieved emergent robustness in high dimensions.    |
 
 ## References
 
 - Snoek, J., Larochelle, H., & Adams, R. P. (2012). Practical Bayesian Optimization of Machine Learning Algorithms. *NeurIPS*.
 - Lakshminarayanan, B., Pritzel, A., & Blundell, C. (2017). Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles. *NeurIPS*.
 - Eriksson, D., et al. (2019). Scalable Global Optimization with Trust Regions (TuRBO). *NeurIPS*.
+- Kaplan, J., et al. (2020). Scaling Laws for Neural Language Models. *arXiv*.
