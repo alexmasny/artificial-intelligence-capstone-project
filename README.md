@@ -164,19 +164,28 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
     * **Emergent Robustness:** Leveraged the "wisdom of the crowd" to handle high-dimensional edge cases (Func 7 & 8). The large ensemble naturally smoothed out local noise and prevented boundary saturation, an emergent behavior not explicitly programmed but resulting from scale.
     * **Diminishing Returns:** Balanced the compute cost of 20x inference against the marginal gains in lower dimensions, accepting higher latency for the sake of stability in critical high-dim functions.
 
+#### **Phase 10: Transparent Optimization (Week 10 - Current)**
+
+* **Method:** Transparent Scaled Ensembles + Interpretability Logging.
+* **Strategy:**
+    * **Interpretability Metrics:** Transitioned from a "black-box" surrogate to a transparent one by explicitly logging internal decision metrics (Predicted Mean, Predictive Standard Deviation, Acquisition Value).
+    * **Reproducibility:** Strictly fixed random seeds and logged hyperparameters to ensure every query decision is auditable and reproducible.
+    * **Decision Transparency:** Explicitly tracked the trade-off between the exploitation signal (mean) and exploration signal (uncertainty) for each submission, making the optimization logic "glass-box".
+
 ### **Summary of Progress**
 
-| Week  | Strategy                  | Key Technologies                     | Outcome                                                                                      |
-| :---- | :------------------------ | :----------------------------------- | :------------------------------------------------------------------------------------------- |
-| **1** | Random Search             | numpy, EDA, Random Forest            | Established baseline, identified key features in 8D function.                                |
-| **2** | Bayesian Optimization     | sklearn GP, UCB, StandardScaler      | Transitioned to model-based search; tailored exploration ($\\kappa$) to function noise.      |
-| **3** | Hybrid SVM-GP             | SVC Filtering, SVR Ensemble          | Reduced search space for High-Dim functions; improved robustness against local optima.       |
-| **4** | Neural Gradient Ascent    | MLPRegressor, L-BFGS, scipy.optimize | Used backpropagation to steer queries; captured non-linearities in complex functions.        |
-| **5** | Neural Ensembles          | NN Bagging, Ensemble Learning        | Improved robustness against overfitting; applied hierarchical feature learning concepts.     |
-| **6** | Trust Region Optimization | Localized Gradient Ascent            | Improved performance against global optima.                                                  |
-| **7** | Adaptive AutoML           | RandomizedSearchCV, UCB, Repulsion   | Optimized architecture per function; forced exploration near peaks with repulsive gradients. |
-| **8** | LLM-Informed Optimization | LLM prompt analysis, Adaptive AutoML | Used LLMs for reflection on sequence framing; kept numerical engine for valid submissions.   |
-| **9** | Scaling Ensembles         | BaggingRegressor (N=20), TrustRegion | Reduced variance via massive ensembling; achieved emergent robustness in high dimensions.    |
+| Week   | Strategy                  | Key Technologies                     | Outcome                                                                                       |
+| :----- | :------------------------ | :----------------------------------- | :-------------------------------------------------------------------------------------------- |
+| **1**  | Random Search             | numpy, EDA, Random Forest            | Established baseline, identified key features in 8D function.                                 |
+| **2**  | Bayesian Optimization     | sklearn GP, UCB, StandardScaler      | Transitioned to model-based search; tailored exploration ($\\kappa$) to function noise.       |
+| **3**  | Hybrid SVM-GP             | SVC Filtering, SVR Ensemble          | Reduced search space for High-Dim functions; improved robustness against local optima.        |
+| **4**  | Neural Gradient Ascent    | MLPRegressor, L-BFGS, scipy.optimize | Used backpropagation to steer queries; captured non-linearities in complex functions.         |
+| **5**  | Neural Ensembles          | NN Bagging, Ensemble Learning        | Improved robustness against overfitting; applied hierarchical feature learning concepts.      |
+| **6**  | Trust Region Optimization | Localized Gradient Ascent            | Improved performance against global optima.                                                   |
+| **7**  | Adaptive AutoML           | RandomizedSearchCV, UCB, Repulsion   | Optimized architecture per function; forced exploration near peaks with repulsive gradients.  |
+| **8**  | LLM-Informed Optimization | LLM prompt analysis, Adaptive AutoML | Used LLMs for reflection on sequence framing; kept numerical engine for valid submissions.    |
+| **9**  | Scaling Ensembles         | BaggingRegressor (N=20), TrustRegion | Reduced variance via massive ensembling; achieved emergent robustness in high dimensions.     |
+| **10** | Transparent Optimization  | Decision Logging, Scaled Ensembles   | Improved interpretability of the surrogate model; reproducible and auditable query decisions. |
 
 ## References
 
