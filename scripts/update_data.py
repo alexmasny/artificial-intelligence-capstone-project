@@ -4,16 +4,19 @@ import re
 import glob
 
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
 def get_sorted_weeks():
     """
     Finds all week directories in data/update/ and returns them sorted by week number.
     """
-    base_dir = os.path.join("data", "update")
+    base_dir = os.path.join(PROJECT_ROOT, "data", "update")
     week_dirs = glob.glob(os.path.join(base_dir, "week*"))
 
     # Sort by the integer number in the folder name (e.g., "week1", "week2")
     def extract_week_num(d):
-        match = re.search(r"week(\d+)", d)
+        match = re.search(r"week(\d+)", os.path.basename(d))
         return int(match.group(1)) if match else 0
 
     return sorted(week_dirs, key=extract_week_num)
@@ -49,9 +52,11 @@ def load_initial_data(func_id):
     """
     Loads the initial data for a given function.
     """
-    base_path = f"data/initial_data/function_{func_id}"
-    inputs_path = f"{base_path}/initial_inputs.npy"
-    outputs_path = f"{base_path}/initial_outputs.npy"
+    base_path = os.path.join(
+        PROJECT_ROOT, "data", "initial_data", f"function_{func_id}"
+    )
+    inputs_path = os.path.join(base_path, "initial_inputs.npy")
+    outputs_path = os.path.join(base_path, "initial_outputs.npy")
 
     if not os.path.exists(inputs_path) or not os.path.exists(outputs_path):
         print(f"⚠️ Initial data not found for Function {func_id} at {base_path}")
@@ -64,7 +69,7 @@ def save_processed_data(func_id, X, Y):
     """
     Saves the aggregated data to data/processed.
     """
-    output_dir = f"data/processed/function_{func_id}"
+    output_dir = os.path.join(PROJECT_ROOT, "data", "processed", f"function_{func_id}")
     os.makedirs(output_dir, exist_ok=True)
 
     np.save(os.path.join(output_dir, "initial_inputs.npy"), X)
