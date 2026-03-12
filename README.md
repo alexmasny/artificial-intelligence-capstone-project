@@ -172,6 +172,22 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
     * **Reproducibility:** Strictly fixed random seeds and logged hyperparameters to ensure every query decision is auditable and reproducible.
     * **Decision Transparency:** Explicitly tracked the trade-off between the exploitation signal (mean) and exploration signal (uncertainty) for each submission, making the optimization logic "glass-box".
 
+#### **Phase 11: Clustering & Boundary Tightening (Week 11)**
+
+* **Method:** Cluster-Centric Trust Regions.
+* **Strategy:**
+    * **High-Yield Clustering:** Selected the top subset (top 15-20%) of known data points to compute a performance-weighted "centroid," anchoring the optimization search.
+    * **Dynamic Boundary Tightening:** Calculated the standard deviation (spread) within the cluster to dynamically define the Trust Region boundaries. Dense clusters enforced tight exploitation, while scattered clusters allowed broader exploration.
+    * **Intra-Cluster Repulsion:** Forced purely localized exploration *between* the historically strong points of the cluster, driving the optimizer to search for unmapped peaks among known successes.
+
+#### **Phase 12: Dimensionality Reduction & PCA (Week 12)**
+
+* **Method:** PCA-Guided Subspace Optimization.
+* **Strategy:**
+    * **Variance-Based Subspaces:** Executed Principal Component Analysis (PCA) on the top-performing cluster to analyze the explained variance ratio across feature dimensions.
+    * **Asymmetric Bounds:** Severely restricted search boundaries on "redundant" (low-variance) converged dimensions, while relaxing the bounds on "principal" (high-variance) dimensions.
+    * **Efficient Exploration:** Maximized the value of the final queries by restricting the optimization payload strictly to active sub-domains, ignoring completely flat operational areas.
+
 ### **Summary of Progress**
 
 | Week   | Strategy                  | Key Technologies                     | Outcome                                                                                       |
@@ -186,6 +202,8 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
 | **8**  | LLM-Informed Optimization | LLM prompt analysis, Adaptive AutoML | Used LLMs for reflection on sequence framing; kept numerical engine for valid submissions.    |
 | **9**  | Scaling Ensembles         | BaggingRegressor (N=20), TrustRegion | Reduced variance via massive ensembling; achieved emergent robustness in high dimensions.     |
 | **10** | Transparent Optimization  | Decision Logging, Scaled Ensembles   | Improved interpretability of the surrogate model; reproducible and auditable query decisions. |
+| **11** | Clustered Trust Regions   | Top-$K$ Centroids, Dynamic Bounds    | Tightened search limits by scaling radius based on cluster variance density.                  |
+| **12** | PCA Subspace Optimization | PCA, Explained Variance              | Focused exploration purely on principal dimensions, clamping boundaries on converged inputs.  |
 
 ## References
 
