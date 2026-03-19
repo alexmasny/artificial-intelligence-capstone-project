@@ -188,6 +188,15 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
     * **Asymmetric Bounds:** Severely restricted search boundaries on "redundant" (low-variance) converged dimensions, while relaxing the bounds on "principal" (high-variance) dimensions.
     * **Efficient Exploration:** Maximized the value of the final queries by restricting the optimization payload strictly to active sub-domains, ignoring completely flat operational areas.
 
+#### **Phase 13: Reinforcement Learning & Pure Exploitation (Week 13)**
+
+* **Method:** Pure Exploitation Q-Value Maximization (Greedy Strategy).
+* **Strategy:**
+    * **Zero Exploration ($\\kappa = 0$):** Following RL schedules (e.g., $\\epsilon$-greedy decay), transitioned entirely from checking uncertain regions to pure exploitation (Greedy) for the final round.
+    * **Temporal Difference & Q-Values:** Used the ensemble surrogate (GP + MLP) as a Q-Value estimator, where comparing historical observations against predictions implicitly models TD errors.
+    * **Micro Trust Regions:** Confined gradient ascent to an extremely tight radius ($\\pm 5\\%$) around the historically absolute best known point, ensuring we climb the immediate peak.
+    * **Autonomous Learning:** Paralleled AlphaGo Zero's self-play by executing model-based planning—simulating candidate points over the surrogate "mental models" before picking the optimal final action across the real black-box environmental states.
+
 ### **Summary of Progress**
 
 | Week   | Strategy                  | Key Technologies                     | Outcome                                                                                       |
@@ -204,6 +213,7 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
 | **10** | Transparent Optimization  | Decision Logging, Scaled Ensembles   | Improved interpretability of the surrogate model; reproducible and auditable query decisions. |
 | **11** | Clustered Trust Regions   | Top-$K$ Centroids, Dynamic Bounds    | Tightened search limits by scaling radius based on cluster variance density.                  |
 | **12** | PCA Subspace Optimization | PCA, Explained Variance              | Focused exploration purely on principal dimensions, clamping boundaries on converged inputs.  |
+| **13** | RL & Pure Exploitation    | Q-Value Maximization, Micro bounds   | Executed final $\\epsilon$-greedy phase ($\\kappa=0$) around tight trust regions for max reward.|
 
 ## References
 
@@ -211,3 +221,4 @@ My approach evolves iteratively as the dataset grows from 10 to ~22 points.
 - Lakshminarayanan, B., Pritzel, A., & Blundell, C. (2017). Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles. *NeurIPS*.
 - Eriksson, D., et al. (2019). Scalable Global Optimization with Trust Regions (TuRBO). *NeurIPS*.
 - Kaplan, J., et al. (2020). Scaling Laws for Neural Language Models. *arXiv*.
+- Silver, D., et al. (2017). Mastering the game of Go without human knowledge (AlphaGo Zero). *Nature*.
