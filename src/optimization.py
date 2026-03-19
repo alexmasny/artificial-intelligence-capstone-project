@@ -2,6 +2,9 @@ import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern, WhiteKernel, ConstantKernel
 from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPRegressor
+from sklearn.ensemble import BaggingRegressor
+from scipy.optimize import minimize
 
 def get_strategy(func_id):
     """
@@ -87,4 +90,73 @@ def suggest_next_point(func_id, X_train, y_train):
     best_idx = np.argmax(ucb_scores)
     next_point = X_candidates[best_idx]
 
+    return next_point
+
+def suggest_final_point_greedy(func_id, X_train, y_train):
+    print(f"\n--- Optimizing Function {func_id} (Pure Exploitation) ---")
+    
+    # 1. Preprocessing
+    scaler_x = StandardScaler()
+    X_scaled = scaler_x.fit_transform(X_train)
+    scaler_y = StandardScaler()
+    y_scaled = scaler_y.fit_transform(y_train.reshape(-1, 1)).flatten()
+    
+    # 2. Train Surrogate Models (Our "Q-Value Approximators")
+    hidden_layers = (128, 64) if func_id in [7, 8] else (64, 32)
+    base_mlp = MLPRegressor(hidden_layer_sizes=hidden_layers, alpha=0.01, 
+                            activation='tanh', solver='lbfgs', max_iter=2000)
+    
+    regr = BaggingRegressor(estimator=base_mlp, n_estimators=20, random_state=42, n_jobs=-1)
+    regr.fit(X_scaled, y_scaled)
+    
+    kernel = ConstantKernel(1.0) * Matern(length_scale=1.0, nu=2.5) + WhiteKernel(noise_level=0.1)
+    gp_model = GaussianProcessRegressor(kernel=kernel, normalize_y=False)
+    gp_model.fit(X_scaled, y_scaled)
+    
+    # 3. Micro Trust Region around the absolute best point
+    best_idx = np.argmax(y_train)
+    best_X_real = X_train[best_idx]
+    
+    # Radius is very tight: only 5% movement allowed from the best known point
+    radius = 0.05
+    bounds_scaled = []
+    for i in range(X_train.shape[1]):
+        mean_val, scale_val = scaler_x.mean_[i], scaler_x.scale_[i]
+        lower = (max(0.0, best_X_real[i] - radius) - mean_val) / scale_val
+        upper = (min(1.0, best_X_real[i] + radius) - mean_val) / scale_val
+        bounds_scaled.append((lower, upper))
+        
+    best_X_scaled = scaler_x.transform(best_X_real.reshape(1, -1)).flatten()
+    
+    # 4. Objective Function (Pure Mean, No Uncertainty)
+    def objective_function(x):
+        x_reshaped = x.reshape(1, -1)
+        nn_preds = np.array([est.predict(x_reshaped)[0] for est in regr.estimators_])
+        avg_nn = np.mean(nn_preds)
+        
+        gp_pred = gp_model.predict(x_reshaped)[0]
+        
+        # The "Expected Reward" (Q-Value)
+        comb_mean = 0.6 * avg_nn + 0.4 * gp_pred
+        
+        # Notice: No kappa * std. We do not care about exploration anymore.
+        # Notice: Minimal repulsion, we just want to climb the immediate hill.
+        dist_sq = np.sum((x_reshaped - best_X_scaled.reshape(1, -1))**2)
+        penalty = 2.0 * np.exp(-dist_sq / (2 * 0.02**2)) 
+        
+        return -comb_mean + penalty
+
+    # 5. Greedy Optimization step
+    # Start slightly off the peak to find the true local gradient
+    x_init = best_X_scaled + np.random.uniform(-0.01, 0.01, size=best_X_scaled.shape)
+    
+    try:
+        res = minimize(fun=objective_function, x0=x_init, method='L-BFGS-B', 
+                       bounds=bounds_scaled, options={'maxiter': 200})
+        best_x = res.x
+    except Exception as e:
+        print(f"   -> Optimizer failed: {e}. Falling back to best known point.")
+        best_x = best_X_scaled
+        
+    next_point = np.clip(scaler_x.inverse_transform(best_x.reshape(1, -1)).flatten(), 0.0, 1.0)
     return next_point
