@@ -2,64 +2,12 @@
 
 ## **Project Overview**
 
-### **Black-Box Optimization (BBO) Capstone**
+### **Documentation Links**
+- **[Datasheet](datasheet.md)**: Details about the dataset, potential biases, and data generation process.
+- **[Model Card](model_card.md)**: Model architecture, intended use, limitations, and ethical considerations.
 
-This repository documents my solution for the Black-Box Optimization challenge, simulating a real-world machine learning scenario where the objective functions are unknown, high-dimensional, and expensive to evaluate. The goal is to maximize the output of eight distinct functions (ranging from 2D to 8D) using a limited budget of weekly queries.
-
-**Relevance:** In industries like drug discovery, chemical manufacturing, or automated hyperparameter tuning, we often treat systems as "black boxes" — we can observe inputs and outputs, but not the internal physics. This project mirrors that constraint, requiring data-driven decision-making under uncertainty.
-
-**Career Value:** Mastering BBO equips me with the skills to handle "cold start" problems and optimize complex systems efficiently, moving beyond standard supervised learning into active learning and decision science.
-
-### **Inputs and Outputs**
-
-The interaction with the "black box" is structured as follows:
-
-* **Inputs:** A query vector $X$ of dimension D (where $D \in \{2, ..., 8\}$).
-  * *Constraints:* All values must be within the hypercube $[0, 1]$.
-  * *Format:* `X1 - X2 - ... - Xn` (e.g., `0.123456 - 0.987654` for a 2D function).
-* **Outputs:** A single continuous scalar value $Y$.
-  * *Goal:* Maximize $Y$.
-  * *Feedback:* After each weekly submission, one new pair ($X_{new}$, $Y_{new}$) is added to the training set.
-
-
-
-### **Challenge Objectives**
-
-The primary objective is not just finding the global maximum, but demonstrating a robust **optimization strategy**.
-
-1. **Maximize Function Output:** Systematically navigate the search space to find peak values.
-2. **Efficient Querying:** Use limited samples (starting with 10 points) to learn complex landscapes.
-3. **Manage Trade-offs:** Balance **Exploration** (gathering information in unknown regions) vs. **Exploitation** (refining solutions in promising areas).
-4. **Handle High Dimensions:** Mitigate the "curse of dimensionality" in 8D functions where data is extremely sparse.
-
-### **Technical Approach (Living Document)**
-
-My approach evolves iteratively as the dataset grows from 10 to ~22 points.
-
-#### **Phase 1: Baseline & EDA (Week 1)**
-
-* **Method:** Random Search and Random Forest-based Exploratory Data Analysis (EDA).
-* **Goal:** Understand the landscape. I analyzed Pearson correlations and Feature Importance to classify functions into "simple" (linear correlations) vs. "complex" (noisy/non-linear).
-* **Key Insight:** Discovered that Function 8 (8D) effectively operates on a lower-dimensional manifold (dominated by dimensions 1 and 3).
-
-#### **Phase 2: Bayesian Optimization (Week 2)**
-
-* **Method:** Gaussian Process (GP) Regression with a Matern kernel + Upper Confidence Bound (UCB) acquisition function.
-* **Strategy:**
-  * **Dynamic Kappa:** Tuned the exploration parameter ($\kappa$) per function. High $\kappa$ (5.0) for noisy functions (1 & 7) to encourage exploration; low $\kappa$ (1.96) for "well-behaved" functions.
-  * **Data Transformation:** Applied `StandardScaler` to targets (e.g., Function 5) to stabilize GP variance estimation in high-magnitude ranges.
-  * **Heuristic Biased Sampling:** For Function 8, I biased the candidate generation toward low values for dimensions $X_1$ and $X_3$ based on strong negative correlations found in EDA, while allowing other dimensions to vary freely.
-
-#### **Phase 3: Hybrid SVM-GP Strategy (Week 3 - Current)**
-
-* **Method:** Integration of Support Vector Machines (SVM) to assist the Gaussian Process.
-* **Refinement:**
-  * **SVC Pruning:** For high-dimensional functions (6D-8D), I implemented a Support Vector Classifier (RBF kernel) to pre-filter the search space, discarding "low-yield" regions before the GP evaluation. This reduces the search volume for the optimizer.
-  * **SVR Consensus:** For mid-dimensional functions, an SVR model acts as a secondary validator. Queries are prioritized only if both the GP (probabilistic) and SVR (deterministic) agree on their potential.
-
-# Artificial Intelligence Capstone Project – Black-Box Optimization (BBO)
-
-## **Project Overview**
+### **Non-Technical Summary**
+Imagine trying to find the highest peak in a dark, hilly landscape where every step you take is extremely expensive. You can only afford to take about 20 steps total. This project builds a "smart compass" (a machine learning model) that helps decide exactly where to step next. By combining multiple AI models acting together like a cautious committee, it learns the shape of the unknown landscape from very little information to avoid bad guesses. The outcome is a system that can efficiently find the optimal settings for complex scenarios—like tuning chemical reactions or edge AI devices—saving significant time and resources without needing thousands of trial-and-error physical experiments.
 
 ### **Black-Box Optimization (BBO) Capstone**
 
